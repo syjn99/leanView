@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: .
+    name: github.com/syjn99/leanView
+    excludes:
+      - frontend/node_modules
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - PACKAGE
