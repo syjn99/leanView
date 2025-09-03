@@ -1,2 +1,4 @@
 # SQLite database file
 **/*.sqlite
+**/*.sqlite-shm
+**/*.sqlite-wal

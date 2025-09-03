@@ -38,7 +38,7 @@ func main() {
 	db.InitDB(&cfg.Database)
 
 	server := server.NewServer(logger.WithField("service", "http"))
-	indexer := indexer.NewIndexer(logger.WithField("service", "indexer"))
+	indexer := indexer.NewIndexer(cfg, logger.WithField("service", "indexer"))
 
 	go func() {
 		if err := indexer.Start(ctx); err != nil {
