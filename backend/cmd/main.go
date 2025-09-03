@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,10 +10,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/syjn99/leanView/backend/indexer"
 	"github.com/syjn99/leanView/backend/server"
+	"github.com/syjn99/leanView/backend/types"
 	"github.com/syjn99/leanView/backend/utils"
 )
 
 func main() {
+	configPath := flag.String("config", "", "Path to the config file, if empty string defaults will be used")
+	flag.Parse()
+
 	// Initialize logger
 	logger := utils.NewLogger()
 	logger.Infof("Starting PQ Devnet Visualizer backend...")
@@ -20,6 +25,12 @@ func main() {
 	// Setup graceful shutdown context
 	ctx, cancel := setupSignalHandling(logger)
 	defer cancel()
+
+	cfg := &types.Config{}
+	err := utils.ReadConfig(cfg, *configPath)
+	if err != nil {
+		logrus.Fatalf("error reading config file: %v", err)
+	}
 
 	server := server.NewServer(logger.WithField("service", "http"))
 	indexer := indexer.NewIndexer(logger.WithField("service", "indexer"))
