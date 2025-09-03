@@ -46,6 +46,11 @@ func InitDB(cfg *types.DatabaseConfig) {
 
 	ReaderDb = dbConn
 	writerDb = dbConn
+
+	// Run database migrations
+	if err := RunMigrations(); err != nil {
+		logger.WithError(err).Fatal("Failed to run database migrations")
+	}
 }
 
 func checkDbConn(dbConn *sqlx.DB, dataBaseName string) {
