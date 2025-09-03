@@ -9,24 +9,29 @@ import (
 )
 
 type Indexer struct {
-	config     *types.Config
-	clientPool *ClientPool
-	poller     *BlockPoller
-	logger     logrus.FieldLogger
+	config         *types.Config
+	clientPool     *ClientPool
+	blockProcessor *BlockProcessor
+	poller         *BlockPoller
+	logger         logrus.FieldLogger
 }
 
 func NewIndexer(config *types.Config, logger logrus.FieldLogger) *Indexer {
 	// Create client pool from endpoint configuration
 	clientPool := NewClientPool(config.LeanApi.Endpoints, logger)
 
-	// Create block poller
-	poller := NewBlockPoller(clientPool, logger)
+	// Create block processor
+	blockProcessor := NewBlockProcessor(logger)
+
+	// Create block poller with processor
+	poller := NewBlockPoller(clientPool, blockProcessor, logger)
 
 	return &Indexer{
-		config:     config,
-		clientPool: clientPool,
-		poller:     poller,
-		logger:     logger,
+		config:         config,
+		clientPool:     clientPool,
+		blockProcessor: blockProcessor,
+		poller:         poller,
+		logger:         logger,
 	}
 }
 

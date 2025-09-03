@@ -12,7 +12,8 @@ import (
 
 // BlockPoller continuously polls endpoints for new blocks based on slot timing
 type BlockPoller struct {
-	clientPool *ClientPool
+	clientPool     *ClientPool
+	blockProcessor *BlockProcessor
 
 	// Polling configuration
 	pollInterval time.Duration
@@ -32,14 +33,15 @@ type BlockPoller struct {
 }
 
 // NewBlockPoller creates a new block poller with slot-based timing
-func NewBlockPoller(clientPool *ClientPool, logger logrus.FieldLogger) *BlockPoller {
+func NewBlockPoller(clientPool *ClientPool, blockProcessor *BlockProcessor, logger logrus.FieldLogger) *BlockPoller {
 	return &BlockPoller{
-		clientPool:   clientPool,
-		pollInterval: defaultPollingInterval, // 4 seconds per slot
-		maxRetries:   defaultMaxRetries,
-		retryDelay:   defaultRetryDelay,
-		stopChannel:  make(chan bool, 1),
-		logger:       logger.WithField("component", "block_poller"),
+		clientPool:     clientPool,
+		blockProcessor: blockProcessor,
+		pollInterval:   defaultPollingInterval, // 4 seconds per slot
+		maxRetries:     defaultMaxRetries,
+		retryDelay:     defaultRetryDelay,
+		stopChannel:    make(chan bool, 1),
+		logger:         logger.WithField("component", "block_poller"),
 	}
 }
 
@@ -132,8 +134,12 @@ func (bp *BlockPoller) pollForNewBlocks(ctx context.Context) error {
 			"slot_gap":      headBlock.Slot - bp.lastProcessedSlot,
 		}).Info("New block detected")
 
-		// TODO: Process the new block(s) - this will be implemented in block processor
-		// For now, just update our tracking
+		// Process the detected new block using the block processor
+		if err := bp.blockProcessor.ProcessBlock(ctx, headBlock); err != nil {
+			bp.logger.WithError(err).WithField("slot", headBlock.Slot).Error("Failed to process new block")
+			// Continue and update the slot even if processing failed to avoid getting stuck
+		}
+
 		bp.updateLastProcessedSlot(headBlock.Slot)
 	} else {
 		bp.logger.WithField("current_slot", headBlock.Slot).Debug("No new blocks")
