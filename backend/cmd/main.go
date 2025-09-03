@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/sirupsen/logrus"
+	"github.com/syjn99/leanView/backend/db"
 	"github.com/syjn99/leanView/backend/indexer"
 	"github.com/syjn99/leanView/backend/server"
 	"github.com/syjn99/leanView/backend/types"
@@ -26,11 +27,15 @@ func main() {
 	ctx, cancel := setupSignalHandling(logger)
 	defer cancel()
 
+	// Parse config file
 	cfg := &types.Config{}
 	err := utils.ReadConfig(cfg, *configPath)
 	if err != nil {
 		logrus.Fatalf("error reading config file: %v", err)
 	}
+
+	// Initialize database instances
+	db.InitDB(&cfg.Database)
 
 	server := server.NewServer(logger.WithField("service", "http"))
 	indexer := indexer.NewIndexer(logger.WithField("service", "indexer"))

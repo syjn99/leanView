@@ -90,27 +90,9 @@ leanapi:
 #   # maximum number of parallel beacon state requests (might cause high memory usage)
 #   maxParallelValidatorSetRequests: 1
 
-# # database configuration
-# database:
-#   engine: "sqlite" # sqlite / pgsql
-
-#   # sqlite settings (only used if engine is sqlite)
-#   sqlite:
-#     file: "./explorer-db.sqlite"
-
-#   # pgsql settings (only used if engine is pgsql)
-#   pgsql:
-#     host: "127.0.0.1"
-#     port: 5432
-#     user: ""
-#     password: ""
-#     name: ""
-#   pgsqlWriter: # optional separate writer connection (used for replication setups)
-#     host: ""
-#     port: 5432
-#     user: ""
-#     password: ""
-#     name: ""
+# database configuration
+database:
+  file: "./lean-view-db.sqlite"
 
 # # separate block db for storing block bodies (no archive beacon node required)
 # blockDb:
