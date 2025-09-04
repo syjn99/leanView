@@ -13,6 +13,18 @@ const (
 	MaxRecentBlocks = 32
 )
 
+// CacheStats represents head cache statistics
+type CacheStats struct {
+	RecentBlocksCount int    `json:"recent_blocks_count"`
+	MaxRecentBlocks   int    `json:"max_recent_blocks"`
+	HasCurrentHead    bool   `json:"has_current_head"`
+	HasJustified      bool   `json:"has_justified"`
+	HasFinalized      bool   `json:"has_finalized"`
+	CurrentHeadSlot   uint64 `json:"current_head_slot,omitempty"`
+	JustifiedSlot     uint64 `json:"justified_slot,omitempty"`
+	FinalizedSlot     uint64 `json:"finalized_slot,omitempty"`
+}
+
 // HeadCache maintains current chain head state aligned with Lean consensus
 type HeadCache struct {
 	// Current chain head
@@ -137,26 +149,26 @@ func (hc *HeadCache) AddRecentBlock(block *types.BlockHeader) {
 }
 
 // GetCacheStats returns cache statistics for monitoring
-func (hc *HeadCache) GetCacheStats() map[string]interface{} {
+func (hc *HeadCache) GetCacheStats() *CacheStats {
 	hc.mutex.RLock()
 	defer hc.mutex.RUnlock()
 
-	stats := map[string]interface{}{
-		"recent_blocks_count": len(hc.recentBlocks),
-		"max_recent_blocks":   MaxRecentBlocks,
-		"has_current_head":    hc.currentHead != nil,
-		"has_justified":       hc.latestJustified != nil,
-		"has_finalized":       hc.latestFinalized != nil,
+	stats := &CacheStats{
+		RecentBlocksCount: len(hc.recentBlocks),
+		MaxRecentBlocks:   MaxRecentBlocks,
+		HasCurrentHead:    hc.currentHead != nil,
+		HasJustified:      hc.latestJustified != nil,
+		HasFinalized:      hc.latestFinalized != nil,
 	}
 
 	if hc.currentHead != nil {
-		stats["current_head_slot"] = hc.currentHead.Slot
+		stats.CurrentHeadSlot = hc.currentHead.Slot
 	}
 	if hc.latestJustified != nil {
-		stats["justified_slot"] = hc.latestJustified.Slot
+		stats.JustifiedSlot = hc.latestJustified.Slot
 	}
 	if hc.latestFinalized != nil {
-		stats["finalized_slot"] = hc.latestFinalized.Slot
+		stats.FinalizedSlot = hc.latestFinalized.Slot
 	}
 
 	return stats

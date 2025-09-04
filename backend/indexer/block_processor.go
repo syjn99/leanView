@@ -53,6 +53,17 @@ func (bp *BlockProcessor) ProcessBlock(ctx context.Context, block *types.BlockHe
 	// Update head cache after successful database storage
 	bp.headCache.UpdateHead(block)
 
+	// Log cache stats for monitoring
+	cacheStats := bp.headCache.GetCacheStats()
+	bp.logger.WithFields(logrus.Fields{
+		"slot":                  block.Slot,
+		"cache_recent_blocks":   cacheStats.RecentBlocksCount,
+		"cache_has_head":        cacheStats.HasCurrentHead,
+		"cache_head_slot":       cacheStats.CurrentHeadSlot,
+		"cache_has_justified":   cacheStats.HasJustified,
+		"cache_has_finalized":   cacheStats.HasFinalized,
+	}).Debug("Head cache updated")
+
 	bp.logger.WithField("slot", block.Slot).Info("Successfully processed block")
 	return nil
 }
