@@ -14,7 +14,7 @@ import (
 type BlockProcessor struct {
 	// Configuration
 	maxRetries int
-	
+
 	// Head cache for chain state tracking
 	headCache *HeadCache
 
@@ -56,12 +56,12 @@ func (bp *BlockProcessor) ProcessBlock(ctx context.Context, block *types.BlockHe
 	// Log cache stats for monitoring
 	cacheStats := bp.headCache.GetCacheStats()
 	bp.logger.WithFields(logrus.Fields{
-		"slot":                  block.Slot,
-		"cache_recent_blocks":   cacheStats.RecentBlocksCount,
-		"cache_has_head":        cacheStats.HasCurrentHead,
-		"cache_head_slot":       cacheStats.CurrentHeadSlot,
-		"cache_has_justified":   cacheStats.HasJustified,
-		"cache_has_finalized":   cacheStats.HasFinalized,
+		"slot":                block.Slot,
+		"cache_recent_blocks": cacheStats.RecentBlocksCount,
+		"cache_has_head":      cacheStats.HasCurrentHead,
+		"cache_head_slot":     cacheStats.CurrentHeadSlot,
+		"cache_has_justified": cacheStats.HasJustified,
+		"cache_has_finalized": cacheStats.HasFinalized,
 	}).Debug("Head cache updated")
 
 	bp.logger.WithField("slot", block.Slot).Info("Successfully processed block")
@@ -99,6 +99,19 @@ func (bp *BlockProcessor) GetLatestProcessedSlot() uint64 {
 	}
 
 	return headers[0].Slot
+}
+
+// CreateCheckpoint creates a checkpoint with proper block root calculation
+func (bp *BlockProcessor) CreateCheckpoint(block *types.BlockHeader) (*types.Checkpoint, error) {
+	blockRoot, err := block.HashTreeRoot()
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate block root for checkpoint: %w", err)
+	}
+
+	return &types.Checkpoint{
+		Root: blockRoot[:],
+		Slot: block.Slot,
+	}, nil
 }
 
 // ProcessBlockRange fetches and processes blocks for a range of slots

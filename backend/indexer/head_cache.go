@@ -58,8 +58,15 @@ func (hc *HeadCache) UpdateHead(block *types.BlockHeader) {
 
 	hc.currentHead = block
 
-	// Add to recent blocks cache
-	rootHex := fmt.Sprintf("%x", block.StateRoot)
+	// Calculate proper block root using SSZ
+	blockRoot, err := block.HashTreeRoot()
+	if err != nil {
+		hc.logger.WithError(err).WithField("slot", block.Slot).Error("Failed to calculate block root")
+		return
+	}
+
+	// Add to recent blocks cache using proper block root
+	rootHex := fmt.Sprintf("%x", blockRoot)
 	hc.recentBlocks[rootHex] = block
 
 	// Prune old blocks if we exceed the limit
@@ -69,7 +76,7 @@ func (hc *HeadCache) UpdateHead(block *types.BlockHeader) {
 
 	hc.logger.WithFields(logrus.Fields{
 		"slot":       block.Slot,
-		"state_root": rootHex[:8] + "...", // Log first 8 chars
+		"block_root": rootHex[:8] + "...", // Log first 8 chars
 	}).Debug("Updated head cache with new block")
 }
 
@@ -140,7 +147,14 @@ func (hc *HeadCache) AddRecentBlock(block *types.BlockHeader) {
 	hc.mutex.Lock()
 	defer hc.mutex.Unlock()
 
-	rootHex := fmt.Sprintf("%x", block.StateRoot)
+	// Calculate proper block root using SSZ
+	blockRoot, err := block.HashTreeRoot()
+	if err != nil {
+		hc.logger.WithError(err).WithField("slot", block.Slot).Error("Failed to calculate block root for recent blocks")
+		return
+	}
+
+	rootHex := fmt.Sprintf("%x", blockRoot)
 	hc.recentBlocks[rootHex] = block
 
 	if len(hc.recentBlocks) > MaxRecentBlocks {
