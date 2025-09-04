@@ -13,6 +13,7 @@ type Indexer struct {
 	clientPool     *ClientPool
 	blockProcessor *BlockProcessor
 	poller         *BlockPoller
+	headCache      *HeadCache
 	logger         logrus.FieldLogger
 }
 
@@ -20,8 +21,11 @@ func NewIndexer(config *types.Config, logger logrus.FieldLogger) *Indexer {
 	// Create client pool from endpoint configuration
 	clientPool := NewClientPool(config.LeanApi.Endpoints, logger)
 
+	// Create head cache
+	headCache := NewHeadCache(logger)
+
 	// Create block processor
-	blockProcessor := NewBlockProcessor(logger)
+	blockProcessor := NewBlockProcessor(headCache, logger)
 
 	// Create block poller with processor
 	poller := NewBlockPoller(clientPool, blockProcessor, logger)
@@ -31,6 +35,7 @@ func NewIndexer(config *types.Config, logger logrus.FieldLogger) *Indexer {
 		clientPool:     clientPool,
 		blockProcessor: blockProcessor,
 		poller:         poller,
+		headCache:      headCache,
 		logger:         logger,
 	}
 }
@@ -69,4 +74,9 @@ func (i *Indexer) Stop() error {
 
 	i.logger.Info("Indexer stopped successfully")
 	return nil
+}
+
+// GetHeadCache returns the head cache for external access
+func (i *Indexer) GetHeadCache() *HeadCache {
+	return i.headCache
 }

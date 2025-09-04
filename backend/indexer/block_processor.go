@@ -14,14 +14,18 @@ import (
 type BlockProcessor struct {
 	// Configuration
 	maxRetries int
+	
+	// Head cache for chain state tracking
+	headCache *HeadCache
 
 	logger logrus.FieldLogger
 }
 
 // NewBlockProcessor creates a new block processor
-func NewBlockProcessor(logger logrus.FieldLogger) *BlockProcessor {
+func NewBlockProcessor(headCache *HeadCache, logger logrus.FieldLogger) *BlockProcessor {
 	return &BlockProcessor{
 		maxRetries: defaultMaxRetries,
+		headCache:  headCache,
 		logger:     logger.WithField("component", "block_processor"),
 	}
 }
@@ -45,6 +49,9 @@ func (bp *BlockProcessor) ProcessBlock(ctx context.Context, block *types.BlockHe
 	if err != nil {
 		return fmt.Errorf("failed to store block for slot %d: %w", block.Slot, err)
 	}
+
+	// Update head cache after successful database storage
+	bp.headCache.UpdateHead(block)
 
 	bp.logger.WithField("slot", block.Slot).Info("Successfully processed block")
 	return nil
@@ -168,6 +175,12 @@ func (bp *BlockProcessor) ProcessBlockRange(ctx context.Context, clientPool *Cli
 		})
 		if err != nil {
 			return fmt.Errorf("failed to store catchup blocks: %w", err)
+		}
+
+		// Update head cache with the latest block from the range
+		if len(allBlocks) > 0 {
+			latestBlock := allBlocks[len(allBlocks)-1]
+			bp.headCache.UpdateHead(latestBlock)
 		}
 	}
 
