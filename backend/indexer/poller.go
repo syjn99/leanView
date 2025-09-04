@@ -23,6 +23,7 @@ type BlockPoller struct {
 	// State tracking
 	lastProcessedSlot uint64
 	isRunning         bool
+	catchupInProgress bool // Track if catchup is running
 
 	// Synchronization
 	ticker      *time.Ticker
@@ -54,6 +55,9 @@ func (bp *BlockPoller) Start(ctx context.Context) error {
 	}
 	bp.isRunning = true
 	bp.ticker = time.NewTicker(bp.pollInterval)
+	
+	// Initialize lastProcessedSlot from database
+	bp.initializeLastProcessedSlot()
 	bp.mutex.Unlock()
 
 	// Start the polling goroutine
@@ -128,11 +132,17 @@ func (bp *BlockPoller) pollForNewBlocks(ctx context.Context) error {
 
 	// Check if this is a new slot
 	if headBlock.Slot > bp.lastProcessedSlot {
+		slotGap := headBlock.Slot - bp.lastProcessedSlot
 		bp.logger.WithFields(logrus.Fields{
 			"new_slot":      headBlock.Slot,
 			"previous_slot": bp.lastProcessedSlot,
-			"slot_gap":      headBlock.Slot - bp.lastProcessedSlot,
+			"slot_gap":      slotGap,
 		}).Info("New block detected")
+
+		// Check for gaps and trigger catchup if needed
+		if slotGap > 1 {
+			bp.detectAndHandleGaps(ctx, headBlock)
+		}
 
 		// Process the detected new block using the block processor
 		if err := bp.blockProcessor.ProcessBlock(ctx, headBlock); err != nil {
@@ -203,4 +213,83 @@ func (bp *BlockPoller) IsRunning() bool {
 	bp.mutex.RLock()
 	defer bp.mutex.RUnlock()
 	return bp.isRunning
+}
+
+// initializeLastProcessedSlot loads the latest processed slot from database
+func (bp *BlockPoller) initializeLastProcessedSlot() {
+	lastSlot := bp.blockProcessor.GetLatestProcessedSlot()
+	bp.lastProcessedSlot = lastSlot
+	
+	if lastSlot == 0 {
+		bp.logger.Info("No previously processed blocks found, starting from slot 0")
+	} else {
+		bp.logger.WithField("last_slot", lastSlot).Info("Initialized with last processed slot from database")
+	}
+}
+
+// detectAndHandleGaps detects gaps in block processing and triggers catchup
+func (bp *BlockPoller) detectAndHandleGaps(ctx context.Context, headBlock *types.BlockHeader) {
+	gapSize := headBlock.Slot - bp.lastProcessedSlot - 1
+	if gapSize <= 0 {
+		return
+	}
+
+	startSlot := bp.lastProcessedSlot + 1
+	endSlot := headBlock.Slot - 1
+
+	bp.logger.WithFields(logrus.Fields{
+		"gap_start":  startSlot,
+		"gap_end":    endSlot,
+		"gap_size":   gapSize,
+		"head_slot":  headBlock.Slot,
+		"last_slot":  bp.lastProcessedSlot,
+	}).Warn("Gap detected in block processing")
+
+	// Check if catchup is already in progress
+	bp.mutex.Lock()
+	if bp.catchupInProgress {
+		bp.mutex.Unlock()
+		bp.logger.Debug("Catchup already in progress, skipping new catchup")
+		return
+	}
+	bp.catchupInProgress = true
+	bp.mutex.Unlock()
+
+	// Launch catchup in a goroutine to avoid blocking new block processing
+	go bp.performCatchup(ctx, startSlot, endSlot)
+}
+
+// performCatchup fetches and processes missing blocks
+func (bp *BlockPoller) performCatchup(ctx context.Context, startSlot, endSlot uint64) {
+	defer func() {
+		bp.mutex.Lock()
+		bp.catchupInProgress = false
+		bp.mutex.Unlock()
+	}()
+
+	bp.logger.WithFields(logrus.Fields{
+		"start_slot": startSlot,
+		"end_slot":   endSlot,
+		"gap_size":   endSlot - startSlot + 1,
+	}).Info("Starting catchup processing")
+
+	startTime := time.Now()
+
+	// Use the block processor's ProcessBlockRange method
+	err := bp.blockProcessor.ProcessBlockRange(ctx, bp.clientPool, startSlot, endSlot)
+	if err != nil {
+		bp.logger.WithError(err).WithFields(logrus.Fields{
+			"start_slot": startSlot,
+			"end_slot":   endSlot,
+		}).Error("Failed to complete catchup processing")
+		return
+	}
+
+	duration := time.Since(startTime)
+	bp.logger.WithFields(logrus.Fields{
+		"start_slot": startSlot,
+		"end_slot":   endSlot,
+		"gap_size":   endSlot - startSlot + 1,
+		"duration":   duration,
+	}).Info("Catchup processing completed successfully")
 }

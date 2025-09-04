@@ -82,3 +82,101 @@ func (bp *BlockProcessor) GetLatestProcessedSlot() uint64 {
 
 	return headers[0].Slot
 }
+
+// ProcessBlockRange fetches and processes blocks for a range of slots
+func (bp *BlockProcessor) ProcessBlockRange(ctx context.Context, clientPool *ClientPool, startSlot, endSlot uint64) error {
+	if startSlot > endSlot {
+		return fmt.Errorf("invalid range: startSlot %d > endSlot %d", startSlot, endSlot)
+	}
+
+	bp.logger.WithFields(logrus.Fields{
+		"start_slot": startSlot,
+		"end_slot":   endSlot,
+		"gap_size":   endSlot - startSlot + 1,
+	}).Info("Processing block range for catchup")
+
+	// Get a healthy client from the pool
+	client := clientPool.GetHealthyClient()
+	if client == nil {
+		return fmt.Errorf("no healthy clients available for block range processing")
+	}
+
+	// Process in batches to avoid memory issues and provide better progress tracking
+	const batchSize = 20
+	totalProcessed := 0
+	var allBlocks []*types.BlockHeader
+
+	for currentSlot := startSlot; currentSlot <= endSlot; {
+		batchEnd := currentSlot + batchSize - 1
+		if batchEnd > endSlot {
+			batchEnd = endSlot
+		}
+
+		bp.logger.WithFields(logrus.Fields{
+			"batch_start": currentSlot,
+			"batch_end":   batchEnd,
+		}).Debug("Fetching batch of blocks")
+
+		// Fetch blocks for this batch
+		blocks, err := client.GetBlockRange(ctx, currentSlot, batchEnd)
+		if err != nil {
+			// Try with a different client if available
+			if newClient := clientPool.GetHealthyClient(); newClient != nil && newClient != client {
+				client = newClient
+				blocks, err = client.GetBlockRange(ctx, currentSlot, batchEnd)
+			}
+			if err != nil {
+				bp.logger.WithError(err).WithFields(logrus.Fields{
+					"batch_start": currentSlot,
+					"batch_end":   batchEnd,
+				}).Error("Failed to fetch block range batch")
+				// Continue with next batch even if this one fails
+				currentSlot = batchEnd + 1
+				continue
+			}
+		}
+
+		// Validate blocks
+		validBlocks := make([]*types.BlockHeader, 0, len(blocks))
+		for _, block := range blocks {
+			if err := bp.validateBlockHeader(block); err != nil {
+				bp.logger.WithError(err).WithField("slot", block.Slot).Warn("Skipping invalid block during catchup")
+				continue
+			}
+			validBlocks = append(validBlocks, block)
+		}
+
+		if len(validBlocks) > 0 {
+			allBlocks = append(allBlocks, validBlocks...)
+			totalProcessed += len(validBlocks)
+		}
+
+		bp.logger.WithFields(logrus.Fields{
+			"batch_start":    currentSlot,
+			"batch_end":      batchEnd,
+			"blocks_fetched": len(blocks),
+			"valid_blocks":   len(validBlocks),
+		}).Debug("Processed batch of blocks")
+
+		currentSlot = batchEnd + 1
+	}
+
+	// Store all blocks in a single transaction for efficiency
+	if len(allBlocks) > 0 {
+		err := db.RunDBTransaction(func(tx *sqlx.Tx) error {
+			return db.InsertBlockHeaderBatch(allBlocks, tx)
+		})
+		if err != nil {
+			return fmt.Errorf("failed to store catchup blocks: %w", err)
+		}
+	}
+
+	bp.logger.WithFields(logrus.Fields{
+		"start_slot":      startSlot,
+		"end_slot":        endSlot,
+		"total_processed": totalProcessed,
+		"blocks_stored":   len(allBlocks),
+	}).Info("Completed block range processing")
+
+	return nil
+}
