@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package api.v1;
+
+option go_package = "github.com/syjn99/leanView/backend/gen/proto/api/v1;apiv1";
+
+// BlockService handles all block-related API requests
+service BlockService {
+  // Get the latest block header from the head cache
+  rpc GetLatestBlockHeader(GetLatestBlockHeaderRequest) returns (GetLatestBlockHeaderResponse);
+}
+
+// --- Core Messages ---
+
+// BlockHeader represents essential block information
+message BlockHeader {
+  uint64 slot = 1;
+  uint64 proposer_index = 2;
+  string parent_root = 3;    // Hex encoded
+  string state_root = 4;     // Hex encoded  
+  string body_root = 5;      // Hex encoded
+}
+
+// --- Request/Response Messages ---
+
+// GetLatestBlockHeaderRequest - fetch header of the current head block
+message GetLatestBlockHeaderRequest {
+  // Empty - always returns the current head
+}
+
+message GetLatestBlockHeaderResponse {
+  BlockHeader block_header = 1;
+  string block_root = 2;
+}
