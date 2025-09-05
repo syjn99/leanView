@@ -9,6 +9,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pressly/goose/v3 v3.25.0
+	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1

@@ -6,7 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"connectrpc.com/connect"
+	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/syjn99/leanView/backend/gen/proto/api/v1/apiv1connect"
+	"github.com/syjn99/leanView/backend/indexer"
+	"github.com/syjn99/leanView/backend/services/block"
 )
 
 const (
@@ -19,20 +25,40 @@ const (
 
 // Server represents the HTTP server with Connect RPC support
 type Server struct {
-	logger logrus.FieldLogger
-
+	logger     logrus.FieldLogger
+	indexer    *indexer.Indexer
 	httpServer *http.Server
 }
 
-func NewServer(logger logrus.FieldLogger) *Server {
+func NewServer(indexer *indexer.Indexer, logger logrus.FieldLogger) *Server {
 	mux := http.NewServeMux()
 
 	// Root handler for basic info
 	mux.HandleFunc("/", rootHandler(logger))
 
+	// Create Block service
+	blockService := block.NewBlockService(indexer, logger.(*logrus.Entry).Logger)
+
+	// Register Connect RPC handler
+	path, handler := apiv1connect.NewBlockServiceHandler(
+		blockService,
+		connect.WithInterceptors(
+			newLoggingInterceptor(logger),
+		),
+	)
+	mux.Handle(path, handler)
+
+	// Add CORS for frontend access (Vite dev server)
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	}).Handler(mux)
+
 	httpServer := &http.Server{
 		Addr:         ":" + defaultPort,
-		Handler:      mux,
+		Handler:      corsHandler,
 		ReadTimeout:  readTimeout,
 		WriteTimeout: writeTimeout,
 		IdleTimeout:  idleTimeout,
@@ -40,6 +66,7 @@ func NewServer(logger logrus.FieldLogger) *Server {
 
 	return &Server{
 		httpServer: httpServer,
+		indexer:    indexer,
 		logger:     logger,
 	}
 }
@@ -85,6 +112,27 @@ func (s *Server) shutdown() error {
 	return nil
 }
 
+// newLoggingInterceptor creates a logging interceptor for Connect RPC
+func newLoggingInterceptor(logger logrus.FieldLogger) connect.UnaryInterceptorFunc {
+	return func(next connect.UnaryFunc) connect.UnaryFunc {
+		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			start := time.Now()
+
+			// Call the handler
+			resp, err := next(ctx, req)
+
+			// Log the request
+			logger.WithFields(logrus.Fields{
+				"method":   req.Spec().Procedure,
+				"duration": time.Since(start).Milliseconds(),
+				"error":    err != nil,
+			}).Debug("RPC request handled")
+
+			return resp, err
+		}
+	}
+}
+
 // rootHandler provides basic service information
 func rootHandler(logger logrus.FieldLogger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +141,7 @@ func rootHandler(logger logrus.FieldLogger) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		response := `{"service":"PQ Devnet Visualizer","version":"0.1.0","endpoints":["/health"]}`
+		response := `{"service":"PQ Devnet Visualizer","version":"0.1.0","endpoints":["/health","/api.v1.BlockService/GetLatestBlockHeader"]}`
 		if _, err := w.Write([]byte(response)); err != nil {
 			logger.Errorf("Error writing root response: %v", err)
 		}

@@ -37,16 +37,16 @@ func main() {
 	// Initialize database instances
 	db.InitDB(&cfg.Database)
 
-	server := server.NewServer(logger.WithField("service", "http"))
-	indexer := indexer.NewIndexer(cfg, logger.WithField("service", "indexer"))
+	indexerInstance := indexer.NewIndexer(cfg, logger.WithField("service", "indexer"))
+	serverInstance := server.NewServer(indexerInstance, logger.WithField("service", "http"))
 
 	go func() {
-		if err := indexer.Start(ctx); err != nil {
+		if err := indexerInstance.Start(ctx); err != nil {
 			logger.WithError(err).Fatalf("Indexer error")
 		}
 	}()
 
-	if err := server.Start(ctx); err != nil {
+	if err := serverInstance.Start(ctx); err != nil {
 		logger.WithError(err).Fatalf("Server error")
 	}
 
