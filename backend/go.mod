@@ -3,12 +3,14 @@ module github.com/syjn99/leanView/backend
 go 1.25.0
 
 require (
+	connectrpc.com/connect v1.18.1
 	github.com/ferranbt/fastssz v1.0.0
 	github.com/glebarez/go-sqlite v1.22.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pressly/goose/v3 v3.25.0
 	github.com/sirupsen/logrus v1.9.3
+	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
