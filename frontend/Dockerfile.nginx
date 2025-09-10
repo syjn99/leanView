@@ -1,0 +1,41 @@
+# Stage 1: Build the frontend
+FROM node:22-alpine AS builder
+WORKDIR /build
+
+# Copy package files
+COPY package.json yarn.lock ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile --network-timeout 100000
+
+# Copy source code
+COPY . .
+
+# Build arguments for runtime configuration
+ARG VITE_API_URL=/api
+ARG VITE_APP_TITLE=LeanView
+
+# Build the application
+RUN yarn build
+
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
+
+# Copy built files from builder stage
+COPY --from=builder /build/dist /usr/share/nginx/html
+
+# Copy nginx configuration template
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+# Set default backend host (can be overridden)
+ENV BACKEND_HOST=backend
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

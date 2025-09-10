@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClientMonitoringDashboard } from './components/ClientMonitoringDashboard';
 
 const finalTransport = createConnectTransport({
-    baseUrl: 'http://localhost:8080',
+    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8080',
 });
 
 const queryClient = new QueryClient();
