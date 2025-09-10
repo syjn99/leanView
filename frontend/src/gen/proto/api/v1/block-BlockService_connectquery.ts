@@ -10,3 +10,10 @@ import { BlockService } from "./block_pb";
  * @generated from rpc api.v1.BlockService.GetLatestBlockHeader
  */
 export const getLatestBlockHeader = BlockService.method.getLatestBlockHeader;
+
+/**
+ * Get multiple block headers with pagination
+ *
+ * @generated from rpc api.v1.BlockService.GetBlockHeaders
+ */
+export const getBlockHeaders = BlockService.method.getBlockHeaders;

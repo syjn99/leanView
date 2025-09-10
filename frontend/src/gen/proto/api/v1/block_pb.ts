@@ -2,15 +2,15 @@
 // @generated from file proto/api/v1/block.proto (package api.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file proto/api/v1/block.proto.
  */
 export const file_proto_api_v1_block: GenFile = /*@__PURE__*/
-  fileDesc("Chhwcm90by9hcGkvdjEvYmxvY2sucHJvdG8SBmFwaS52MSJvCgtCbG9ja0hlYWRlchIMCgRzbG90GAEgASgEEhYKDnByb3Bvc2VyX2luZGV4GAIgASgEEhMKC3BhcmVudF9yb290GAMgASgJEhIKCnN0YXRlX3Jvb3QYBCABKAkSEQoJYm9keV9yb290GAUgASgJIh0KG0dldExhdGVzdEJsb2NrSGVhZGVyUmVxdWVzdCJdChxHZXRMYXRlc3RCbG9ja0hlYWRlclJlc3BvbnNlEikKDGJsb2NrX2hlYWRlchgBIAEoCzITLmFwaS52MS5CbG9ja0hlYWRlchISCgpibG9ja19yb290GAIgASgJMnEKDEJsb2NrU2VydmljZRJhChRHZXRMYXRlc3RCbG9ja0hlYWRlchIjLmFwaS52MS5HZXRMYXRlc3RCbG9ja0hlYWRlclJlcXVlc3QaJC5hcGkudjEuR2V0TGF0ZXN0QmxvY2tIZWFkZXJSZXNwb25zZUI7WjlnaXRodWIuY29tL3N5am45OS9sZWFuVmlldy9iYWNrZW5kL2dlbi9wcm90by9hcGkvdjE7YXBpdjFiBnByb3RvMw");
+  fileDesc("Chhwcm90by9hcGkvdjEvYmxvY2sucHJvdG8SBmFwaS52MSJvCgtCbG9ja0hlYWRlchIMCgRzbG90GAEgASgEEhYKDnByb3Bvc2VyX2luZGV4GAIgASgEEhMKC3BhcmVudF9yb290GAMgASgJEhIKCnN0YXRlX3Jvb3QYBCABKAkSEQoJYm9keV9yb290GAUgASgJIh0KG0dldExhdGVzdEJsb2NrSGVhZGVyUmVxdWVzdCJdChxHZXRMYXRlc3RCbG9ja0hlYWRlclJlc3BvbnNlEikKDGJsb2NrX2hlYWRlchgBIAEoCzITLmFwaS52MS5CbG9ja0hlYWRlchISCgpibG9ja19yb290GAIgASgJIp8BChZHZXRCbG9ja0hlYWRlcnNSZXF1ZXN0Eg0KBWxpbWl0GAEgASgNEg4KBm9mZnNldBgCIAEoBBI8Cgpzb3J0X29yZGVyGAMgASgOMiguYXBpLnYxLkdldEJsb2NrSGVhZGVyc1JlcXVlc3QuU29ydE9yZGVyIigKCVNvcnRPcmRlchINCglTTE9UX0RFU0MQABIMCghTTE9UX0FTQxABIoMBChdHZXRCbG9ja0hlYWRlcnNSZXNwb25zZRIsCgdoZWFkZXJzGAEgAygLMhsuYXBpLnYxLkJsb2NrSGVhZGVyV2l0aFJvb3QSEwoLdG90YWxfY291bnQYAiABKA0SEAoIaGFzX21vcmUYAyABKAgSEwoLbmV4dF9vZmZzZXQYBCABKAQiTgoTQmxvY2tIZWFkZXJXaXRoUm9vdBIjCgZoZWFkZXIYASABKAsyEy5hcGkudjEuQmxvY2tIZWFkZXISEgoKYmxvY2tfcm9vdBgCIAEoCTLFAQoMQmxvY2tTZXJ2aWNlEmEKFEdldExhdGVzdEJsb2NrSGVhZGVyEiMuYXBpLnYxLkdldExhdGVzdEJsb2NrSGVhZGVyUmVxdWVzdBokLmFwaS52MS5HZXRMYXRlc3RCbG9ja0hlYWRlclJlc3BvbnNlElIKD0dldEJsb2NrSGVhZGVycxIeLmFwaS52MS5HZXRCbG9ja0hlYWRlcnNSZXF1ZXN0Gh8uYXBpLnYxLkdldEJsb2NrSGVhZGVyc1Jlc3BvbnNlQjtaOWdpdGh1Yi5jb20vc3lqbjk5L2xlYW5WaWV3L2JhY2tlbmQvZ2VuL3Byb3RvL2FwaS92MTthcGl2MWIGcHJvdG8z");
 
 /**
  * BlockHeader represents essential block information
@@ -97,6 +97,130 @@ export const GetLatestBlockHeaderResponseSchema: GenMessage<GetLatestBlockHeader
   messageDesc(file_proto_api_v1_block, 2);
 
 /**
+ * Request for paginated block headers
+ *
+ * @generated from message api.v1.GetBlockHeadersRequest
+ */
+export type GetBlockHeadersRequest = Message<"api.v1.GetBlockHeadersRequest"> & {
+  /**
+   * Max headers to return (default: 50, max: 100)
+   *
+   * @generated from field: uint32 limit = 1;
+   */
+  limit: number;
+
+  /**
+   * Slot number offset for pagination
+   *
+   * @generated from field: uint64 offset = 2;
+   */
+  offset: bigint;
+
+  /**
+   * @generated from field: api.v1.GetBlockHeadersRequest.SortOrder sort_order = 3;
+   */
+  sortOrder: GetBlockHeadersRequest_SortOrder;
+};
+
+/**
+ * Describes the message api.v1.GetBlockHeadersRequest.
+ * Use `create(GetBlockHeadersRequestSchema)` to create a new message.
+ */
+export const GetBlockHeadersRequestSchema: GenMessage<GetBlockHeadersRequest> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_block, 3);
+
+/**
+ * @generated from enum api.v1.GetBlockHeadersRequest.SortOrder
+ */
+export enum GetBlockHeadersRequest_SortOrder {
+  /**
+   * Latest first (default)
+   *
+   * @generated from enum value: SLOT_DESC = 0;
+   */
+  SLOT_DESC = 0,
+
+  /**
+   * Oldest first
+   *
+   * @generated from enum value: SLOT_ASC = 1;
+   */
+  SLOT_ASC = 1,
+}
+
+/**
+ * Describes the enum api.v1.GetBlockHeadersRequest.SortOrder.
+ */
+export const GetBlockHeadersRequest_SortOrderSchema: GenEnum<GetBlockHeadersRequest_SortOrder> = /*@__PURE__*/
+  enumDesc(file_proto_api_v1_block, 3, 0);
+
+/**
+ * Response with paginated block headers
+ *
+ * @generated from message api.v1.GetBlockHeadersResponse
+ */
+export type GetBlockHeadersResponse = Message<"api.v1.GetBlockHeadersResponse"> & {
+  /**
+   * @generated from field: repeated api.v1.BlockHeaderWithRoot headers = 1;
+   */
+  headers: BlockHeaderWithRoot[];
+
+  /**
+   * Total headers in database
+   *
+   * @generated from field: uint32 total_count = 2;
+   */
+  totalCount: number;
+
+  /**
+   * More data available
+   *
+   * @generated from field: bool has_more = 3;
+   */
+  hasMore: boolean;
+
+  /**
+   * Next offset for pagination
+   *
+   * @generated from field: uint64 next_offset = 4;
+   */
+  nextOffset: bigint;
+};
+
+/**
+ * Describes the message api.v1.GetBlockHeadersResponse.
+ * Use `create(GetBlockHeadersResponseSchema)` to create a new message.
+ */
+export const GetBlockHeadersResponseSchema: GenMessage<GetBlockHeadersResponse> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_block, 4);
+
+/**
+ * Block header with computed root
+ *
+ * @generated from message api.v1.BlockHeaderWithRoot
+ */
+export type BlockHeaderWithRoot = Message<"api.v1.BlockHeaderWithRoot"> & {
+  /**
+   * @generated from field: api.v1.BlockHeader header = 1;
+   */
+  header?: BlockHeader;
+
+  /**
+   * Hex encoded with 0x prefix
+   *
+   * @generated from field: string block_root = 2;
+   */
+  blockRoot: string;
+};
+
+/**
+ * Describes the message api.v1.BlockHeaderWithRoot.
+ * Use `create(BlockHeaderWithRootSchema)` to create a new message.
+ */
+export const BlockHeaderWithRootSchema: GenMessage<BlockHeaderWithRoot> = /*@__PURE__*/
+  messageDesc(file_proto_api_v1_block, 5);
+
+/**
  * BlockService handles all block-related API requests
  *
  * @generated from service api.v1.BlockService
@@ -111,6 +235,16 @@ export const BlockService: GenService<{
     methodKind: "unary";
     input: typeof GetLatestBlockHeaderRequestSchema;
     output: typeof GetLatestBlockHeaderResponseSchema;
+  },
+  /**
+   * Get multiple block headers with pagination
+   *
+   * @generated from rpc api.v1.BlockService.GetBlockHeaders
+   */
+  getBlockHeaders: {
+    methodKind: "unary";
+    input: typeof GetBlockHeadersRequestSchema;
+    output: typeof GetBlockHeadersResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_proto_api_v1_block, 0);
