@@ -13,6 +13,7 @@ import (
 	"github.com/syjn99/leanView/backend/gen/proto/api/v1/apiv1connect"
 	"github.com/syjn99/leanView/backend/indexer"
 	"github.com/syjn99/leanView/backend/services/block"
+	"github.com/syjn99/leanView/backend/services/monitoring"
 )
 
 const (
@@ -39,14 +40,26 @@ func NewServer(indexer *indexer.Indexer, logger logrus.FieldLogger) *Server {
 	// Create Block service
 	blockService := block.NewBlockService(indexer, logger.(*logrus.Entry).Logger)
 
-	// Register Connect RPC handler
-	path, handler := apiv1connect.NewBlockServiceHandler(
+	// Register Block service Connect RPC handler
+	blockPath, blockHandler := apiv1connect.NewBlockServiceHandler(
 		blockService,
 		connect.WithInterceptors(
 			newLoggingInterceptor(logger),
 		),
 	)
-	mux.Handle(path, handler)
+	mux.Handle(blockPath, blockHandler)
+
+	// Create Monitoring service
+	monitoringService := monitoring.NewMonitoringService(indexer, logger.(*logrus.Entry).Logger)
+
+	// Register Monitoring service Connect RPC handler
+	monitoringPath, monitoringHandler := apiv1connect.NewMonitoringServiceHandler(
+		monitoringService,
+		connect.WithInterceptors(
+			newLoggingInterceptor(logger),
+		),
+	)
+	mux.Handle(monitoringPath, monitoringHandler)
 
 	// Add CORS for frontend access (Vite dev server)
 	corsHandler := cors.New(cors.Options{
@@ -141,7 +154,7 @@ func rootHandler(logger logrus.FieldLogger) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		response := `{"service":"PQ Devnet Visualizer","version":"0.1.0","endpoints":["/health","/api.v1.BlockService/GetLatestBlockHeader"]}`
+		response := `{"service":"PQ Devnet Visualizer","version":"0.1.0","endpoints":["/health","/api.v1.BlockService/GetLatestBlockHeader","/api.v1.MonitoringService/GetAllClientsHeads"]}`
 		if _, err := w.Write([]byte(response)); err != nil {
 			logger.Errorf("Error writing root response: %v", err)
 		}

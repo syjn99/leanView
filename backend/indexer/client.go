@@ -110,3 +110,16 @@ func (c *Client) GetLastError() error {
 	defer c.mutex.RUnlock()
 	return c.lastError
 }
+
+// GetConfig returns the client's endpoint configuration
+func (c *Client) GetConfig() *types.EndpointConfig {
+	// Config is immutable, no lock needed
+	return c.config
+}
+
+// GetLastChecked returns the last health check timestamp
+func (c *Client) GetLastChecked() time.Time {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.lastChecked
+}

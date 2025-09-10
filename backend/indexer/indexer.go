@@ -80,3 +80,8 @@ func (i *Indexer) Stop() error {
 func (i *Indexer) GetHeadCache() *HeadCache {
 	return i.headCache
 }
+
+// GetClientPool returns the client pool for external access
+func (i *Indexer) GetClientPool() *ClientPool {
+	return i.clientPool
+}

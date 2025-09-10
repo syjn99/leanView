@@ -130,3 +130,14 @@ func (cp *ClientPool) GetHealthyClientCount() int {
 	}
 	return count
 }
+
+// GetAllClients returns all clients in the pool
+func (cp *ClientPool) GetAllClients() []*Client {
+	cp.mutex.RLock()
+	defer cp.mutex.RUnlock()
+
+	// Return a copy to avoid race conditions
+	clients := make([]*Client, len(cp.clients))
+	copy(clients, cp.clients)
+	return clients
+}
