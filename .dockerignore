@@ -1,0 +1,55 @@
+# Version control
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+!README.md
+
+# Development files
+.env.local
+.env.*.local
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.DS_Store
+frontend/*.pem
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Backend
+backend/tmp/
+backend/*.test
+backend/*.out
+backend/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+Dockerfile.dev
+
+# Data
+data/
+*.sqlite
+*.sqlite3
+*.db

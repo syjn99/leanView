@@ -37,6 +37,9 @@ func NewServer(indexer *indexer.Indexer, logger logrus.FieldLogger) *Server {
 	// Root handler for basic info
 	mux.HandleFunc("/", rootHandler(logger))
 
+	// Health check endpoint for container orchestration
+	mux.HandleFunc("/health", healthHandler(logger))
+
 	// Create Block service
 	blockService := block.NewBlockService(indexer, logger.(*logrus.Entry).Logger)
 
@@ -157,6 +160,20 @@ func rootHandler(logger logrus.FieldLogger) http.HandlerFunc {
 		response := `{"service":"PQ Devnet Visualizer","version":"0.1.0","endpoints":["/health","/api.v1.BlockService/GetLatestBlockHeader","/api.v1.MonitoringService/GetAllClientsHeads"]}`
 		if _, err := w.Write([]byte(response)); err != nil {
 			logger.Errorf("Error writing root response: %v", err)
+		}
+	}
+}
+
+// healthHandler provides health status for container orchestration
+func healthHandler(logger logrus.FieldLogger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Simple health check - server is running
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		response := `{"status":"healthy","service":"PQ Devnet Visualizer"}`
+		if _, err := w.Write([]byte(response)); err != nil {
+			logger.Errorf("Error writing health response: %v", err)
 		}
 	}
 }
