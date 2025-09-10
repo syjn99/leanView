@@ -1,0 +1,13 @@
+# Docker-specific configuration for LeanView
+# This config is used when running in Docker containers
+
+leanapi:
+  # lean node rpc endpoints
+  # Using host.docker.internal to reach services on host machine
+  endpoints:
+    - name: "local"
+      url: "http://host.docker.internal:5052"
+
+# database configuration
+database:
+  file: "/app/data/lean-view.sqlite"

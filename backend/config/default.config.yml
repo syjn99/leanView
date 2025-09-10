@@ -47,8 +47,8 @@
 leanapi:
   # lean node rpc endpoints
   endpoints:
-    - name: "ream-1"
-      url: "http://host.docker.internal:5052"
+    - name: "local"
+      url: "http://localhost:5052"
 
   # local cache for page models
   # localCacheSize: 100 # 100MB

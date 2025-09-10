@@ -3,10 +3,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    command: ["--config", "/app/config/docker.config.yml"]
     ports:
       - "8080:8080"
     volumes:
       - ./data:/app/data
+      - ./config:/app/config:ro
     environment:
       - DATABASE_FILE=/app/data/lean-view.sqlite
       - API_HOST=0.0.0.0

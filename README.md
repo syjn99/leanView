@@ -22,6 +22,26 @@ Access the application:
 - Backend API: http://localhost:8080
 - API via Frontend proxy: http://localhost:3000/api/
 
+### Configuration
+
+The backend uses `config/docker.config.yml` when running in Docker. This file configures:
+
+- **Lean node endpoints**: Uses `host.docker.internal:5052` to reach services on your host machine
+- **Database path**: Points to `/app/data/lean-view.sqlite` for container environment
+
+To modify lean node endpoints for Docker, edit `config/docker.config.yml`:
+
+```yaml
+leanapi:
+  endpoints:
+    - name: "local"
+      url: "http://host.docker.internal:5052" # For local development
+      # url: "http://192.168.1.100:5052"       # For network services
+      # url: "http://node.example.com:5052"    # For remote services
+```
+
+The default `backend/config/default.config.yml` remains configured for local development with `localhost:5052`.
+
 ## Running with Docker (Individual Containers)
 
 ### Backend
