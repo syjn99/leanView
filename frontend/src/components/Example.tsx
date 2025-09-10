@@ -4,7 +4,11 @@ import type { FC } from 'react';
 import { getAllClientsHeads } from '../gen/proto/api/v1/monitoring-MonitoringService_connectquery';
 
 export const Example: FC = () => {
-    const { data, isLoading, error } = useQuery(getAllClientsHeads, {});
+    const { data, isLoading, error } = useQuery(
+        getAllClientsHeads,
+        {},
+        { refetchInterval: 4000 },
+    );
 
     if (isLoading) {
         return (
