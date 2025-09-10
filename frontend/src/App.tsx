@@ -2,6 +2,8 @@ import { createConnectTransport } from "@connectrpc/connect-web";
 import { TransportProvider } from "@connectrpc/connect-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { Example } from "./components/Example";
+
 const finalTransport = createConnectTransport({
   baseUrl: "http://localhost:8080",
 });
@@ -20,7 +22,9 @@ function App() {
             </div>
           </header>
 
-          <main></main>
+          <main>
+            <Example />
+          </main>
         </div>
       </QueryClientProvider>
     </TransportProvider>
