@@ -173,6 +173,18 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.7.0.tgz#8944a4575abdc222839f93e90c861a67f1981787"
   integrity sha512-qn6tAIZEw5i/wiESBF4nQxZkl86aY4KoO0IkUa2Lh+rya64oTOdJQFlZuMwI1Qz9VBJQrQC4QlSA2DNek5gCOA==
 
+"@connectrpc/connect-query-core@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@connectrpc/connect-query-core/-/connect-query-core-2.2.0.tgz#4016f40d1b36d7ed20454345c08479b8a64930f3"
+  integrity sha512-t/CuxW/vP84y2iyS+PnbAnBwgOTYMzHXTSoBUKC1vIn706aNiZP40Y6mGJybglyH63RhAPcOdUgzG7DjzaAHCw==
+
+"@connectrpc/connect-query@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@connectrpc/connect-query/-/connect-query-2.2.0.tgz#f5ba89d8089935ae1efc950d512faa1dca6c79a4"
+  integrity sha512-oQ+coXOwBmfl4/t6EOrTfzW0zdoGDe3kvUYqZHrbzORkRFd693Cz8PxuDBjRCjmBPhDRCQMxFhR1jn2+SbgEKQ==
+  dependencies:
+    "@connectrpc/connect-query-core" "^2.2.0"
+
 "@connectrpc/connect-web@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@connectrpc/connect-web/-/connect-web-2.1.0.tgz#9f95b216ca1c54d8e17237714efc5ca189ae535d"
@@ -563,6 +575,18 @@
   version "4.50.0"
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.50.0.tgz#d81efe6a12060c7feddf9805e2a94c3ab0679f48"
   integrity sha512-xMmiWRR8sp72Zqwjgtf3QbZfF1wdh8X2ABu3EaozvZcyHJeU0r+XAnXdKgs4cCAp6ORoYoCygipYP1mjmbjrsg==
+
+"@tanstack/query-core@5.87.1":
+  version "5.87.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.87.1.tgz#9b8b9331714749d505a7ceb0ae52b6ad6ae8a461"
+  integrity sha512-HOFHVvhOCprrWvtccSzc7+RNqpnLlZ5R6lTmngb8aq7b4rc2/jDT0w+vLdQ4lD9bNtQ+/A4GsFXy030Gk4ollA==
+
+"@tanstack/react-query@^5.87.1":
+  version "5.87.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.87.1.tgz#074bd2238173f49ef8804a9b6d94f63374828a78"
+  integrity sha512-YKauf8jfMowgAqcxj96AHs+Ux3m3bWT1oSVKamaRPXSnW2HqSznnTCEkAVqctF1e/W9R/mPcyzzINIgpOH94qg==
+  dependencies:
+    "@tanstack/query-core" "5.87.1"
 
 "@types/babel__core@^7.20.5":
   version "7.20.5"
