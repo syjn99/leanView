@@ -172,3 +172,41 @@ func GetBlockHeadersInRange(startSlot, endSlot uint64) ([]*types.BlockHeader, er
 	}
 	return headers, nil
 }
+
+// GetBlockHeadersPaginated retrieves block headers with pagination support
+func GetBlockHeadersPaginated(limit int, offset uint64, ascending bool) ([]*types.BlockHeader, error) {
+	headers := []*types.BlockHeader{}
+	
+	var query string
+	if ascending {
+		query = `
+			SELECT slot, proposer_index, parent_root, state_root, body_root
+			FROM block_headers
+			WHERE slot >= ?
+			ORDER BY slot ASC
+			LIMIT ?`
+	} else {
+		query = `
+			SELECT slot, proposer_index, parent_root, state_root, body_root
+			FROM block_headers
+			WHERE slot <= ?
+			ORDER BY slot DESC
+			LIMIT ?`
+	}
+	
+	err := ReaderDb.Select(&headers, query, offset, limit)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching paginated block headers: %w", err)
+	}
+	return headers, nil
+}
+
+// GetTotalBlockCount returns the total number of block headers in the database
+func GetTotalBlockCount() (uint32, error) {
+	var count uint32
+	err := ReaderDb.Get(&count, `SELECT COUNT(*) FROM block_headers`)
+	if err != nil {
+		return 0, fmt.Errorf("error counting block headers: %w", err)
+	}
+	return count, nil
+}

@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/sirupsen/logrus"
 
+	"github.com/syjn99/leanView/backend/db"
 	apiv1 "github.com/syjn99/leanView/backend/gen/proto/api/v1"
 	"github.com/syjn99/leanView/backend/indexer"
 )
@@ -80,5 +81,89 @@ func (s *BlockService) GetLatestBlockHeader(
 	return connect.NewResponse(&apiv1.GetLatestBlockHeaderResponse{
 		BlockHeader: protoHeader,
 		BlockRoot:   blockRootHex,
+	}), nil
+}
+
+// GetBlockHeaders returns paginated block headers from the database
+func (s *BlockService) GetBlockHeaders(
+	ctx context.Context,
+	req *connect.Request[apiv1.GetBlockHeadersRequest],
+) (*connect.Response[apiv1.GetBlockHeadersResponse], error) {
+	// Validate and set default values for request parameters
+	limit := req.Msg.Limit
+	if limit == 0 {
+		limit = 50
+	} else if limit > 100 {
+		limit = 100
+	}
+	
+	offset := req.Msg.Offset
+	ascending := req.Msg.SortOrder == apiv1.GetBlockHeadersRequest_SLOT_ASC
+	
+	// Query database for paginated headers
+	headers, err := db.GetBlockHeadersPaginated(int(limit), offset, ascending)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to fetch paginated block headers")
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+	
+	// Get total count
+	totalCount, err := db.GetTotalBlockCount()
+	if err != nil {
+		s.logger.WithError(err).Warn("Failed to get total block count")
+		totalCount = uint32(len(headers))
+	}
+	
+	// Convert to protobuf format
+	var protoHeaders []*apiv1.BlockHeaderWithRoot
+	for _, header := range headers {
+		// Calculate block root
+		blockRoot, err := header.HashTreeRoot()
+		if err != nil {
+			s.logger.WithError(err).WithField("slot", header.Slot).Warn("Failed to calculate block root")
+			continue
+		}
+		
+		protoHeader := &apiv1.BlockHeaderWithRoot{
+			Header: &apiv1.BlockHeader{
+				Slot:          header.Slot,
+				ProposerIndex: header.ProposerIndex,
+				ParentRoot:    "0x" + hex.EncodeToString(header.ParentRoot),
+				StateRoot:     "0x" + hex.EncodeToString(header.StateRoot),
+				BodyRoot:      "0x" + hex.EncodeToString(header.BodyRoot),
+			},
+			BlockRoot: "0x" + hex.EncodeToString(blockRoot[:]),
+		}
+		protoHeaders = append(protoHeaders, protoHeader)
+	}
+	
+	// Determine if there are more results
+	hasMore := len(headers) == int(limit)
+	
+	// Calculate next offset
+	var nextOffset uint64
+	if len(headers) > 0 {
+		if ascending {
+			nextOffset = headers[len(headers)-1].Slot + 1
+		} else {
+			nextOffset = headers[len(headers)-1].Slot - 1
+		}
+	} else {
+		nextOffset = offset
+	}
+	
+	s.logger.WithFields(logrus.Fields{
+		"limit":      limit,
+		"offset":     offset,
+		"count":      len(protoHeaders),
+		"total":      totalCount,
+		"ascending":  ascending,
+	}).Debug("Serving paginated block headers")
+	
+	return connect.NewResponse(&apiv1.GetBlockHeadersResponse{
+		Headers:     protoHeaders,
+		TotalCount:  totalCount,
+		HasMore:     hasMore,
+		NextOffset:  nextOffset,
 	}), nil
 }
