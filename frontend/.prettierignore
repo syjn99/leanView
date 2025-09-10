@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Generated files
+src/gen/
+*.generated.*
+
+# Lock files
+yarn.lock
+package-lock.json
+
+# Config files
+*.config.js
+*.config.ts
+
+# Other
+coverage/
+.DS_Store
+*.log

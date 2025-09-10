@@ -49,7 +49,9 @@ Create a lightweight, standalone visualization tool inspired by:
 ### Frontend
 - **Framework**: React
 - **Build Tool**: Vite
+- **Package Manager**: Yarn (primary)
 - **API Client**: Connect RPC
+- **Styling**: Tailwind CSS
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
@@ -119,3 +121,47 @@ go run cmd/main.go
 ```
 
 3. **Test endpoints**: Use the curl commands above or any Connect RPC client
+
+## 🎨 Frontend Development
+
+### Package Management
+**IMPORTANT**: This project uses **Yarn** as the primary package manager. Do not use npm or pnpm.
+
+### Common Commands
+
+1. **Install dependencies**:
+```bash
+cd frontend
+yarn install
+```
+
+2. **Start development server**:
+```bash
+yarn dev
+```
+
+3. **Build for production**:
+```bash
+yarn build
+```
+
+4. **Add a new dependency**:
+```bash
+yarn add <package-name>
+```
+
+5. **Add a dev dependency**:
+```bash
+yarn add -D <package-name>
+```
+
+6. **Run linting**:
+```bash
+yarn lint
+```
+
+### Important Notes
+- Always use `yarn` instead of `npm` for consistency
+- The `yarn.lock` file should be committed to version control
+- Never commit `package-lock.json` (npm's lock file)
+- If you see a `package-lock.json` file, delete it and use `yarn install` instead

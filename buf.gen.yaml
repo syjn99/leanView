@@ -6,9 +6,9 @@ plugins:
   - plugin: buf.build/connectrpc/go
     out: backend/gen
     opt: [paths=source_relative]
-  - plugin: buf.build/bufbuild/es
+  - plugin: buf.build/bufbuild/es:v2.7.0
     out: frontend/src/gen
     opt: [target=ts]
-  - plugin: buf.build/connectrpc/es
+  - plugin: buf.build/connectrpc/query-es:v2.1.1
     out: frontend/src/gen
     opt: [target=ts]
