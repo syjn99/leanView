@@ -36,12 +36,17 @@ const (
 	// BlockServiceGetLatestBlockHeaderProcedure is the fully-qualified name of the BlockService's
 	// GetLatestBlockHeader RPC.
 	BlockServiceGetLatestBlockHeaderProcedure = "/api.v1.BlockService/GetLatestBlockHeader"
+	// BlockServiceGetBlockHeadersProcedure is the fully-qualified name of the BlockService's
+	// GetBlockHeaders RPC.
+	BlockServiceGetBlockHeadersProcedure = "/api.v1.BlockService/GetBlockHeaders"
 )
 
 // BlockServiceClient is a client for the api.v1.BlockService service.
 type BlockServiceClient interface {
 	// Get the latest block header from the head cache
 	GetLatestBlockHeader(context.Context, *connect.Request[v1.GetLatestBlockHeaderRequest]) (*connect.Response[v1.GetLatestBlockHeaderResponse], error)
+	// Get multiple block headers with pagination
+	GetBlockHeaders(context.Context, *connect.Request[v1.GetBlockHeadersRequest]) (*connect.Response[v1.GetBlockHeadersResponse], error)
 }
 
 // NewBlockServiceClient constructs a client for the api.v1.BlockService service. By default, it
@@ -61,12 +66,19 @@ func NewBlockServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(blockServiceMethods.ByName("GetLatestBlockHeader")),
 			connect.WithClientOptions(opts...),
 		),
+		getBlockHeaders: connect.NewClient[v1.GetBlockHeadersRequest, v1.GetBlockHeadersResponse](
+			httpClient,
+			baseURL+BlockServiceGetBlockHeadersProcedure,
+			connect.WithSchema(blockServiceMethods.ByName("GetBlockHeaders")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // blockServiceClient implements BlockServiceClient.
 type blockServiceClient struct {
 	getLatestBlockHeader *connect.Client[v1.GetLatestBlockHeaderRequest, v1.GetLatestBlockHeaderResponse]
+	getBlockHeaders      *connect.Client[v1.GetBlockHeadersRequest, v1.GetBlockHeadersResponse]
 }
 
 // GetLatestBlockHeader calls api.v1.BlockService.GetLatestBlockHeader.
@@ -74,10 +86,17 @@ func (c *blockServiceClient) GetLatestBlockHeader(ctx context.Context, req *conn
 	return c.getLatestBlockHeader.CallUnary(ctx, req)
 }
 
+// GetBlockHeaders calls api.v1.BlockService.GetBlockHeaders.
+func (c *blockServiceClient) GetBlockHeaders(ctx context.Context, req *connect.Request[v1.GetBlockHeadersRequest]) (*connect.Response[v1.GetBlockHeadersResponse], error) {
+	return c.getBlockHeaders.CallUnary(ctx, req)
+}
+
 // BlockServiceHandler is an implementation of the api.v1.BlockService service.
 type BlockServiceHandler interface {
 	// Get the latest block header from the head cache
 	GetLatestBlockHeader(context.Context, *connect.Request[v1.GetLatestBlockHeaderRequest]) (*connect.Response[v1.GetLatestBlockHeaderResponse], error)
+	// Get multiple block headers with pagination
+	GetBlockHeaders(context.Context, *connect.Request[v1.GetBlockHeadersRequest]) (*connect.Response[v1.GetBlockHeadersResponse], error)
 }
 
 // NewBlockServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -93,10 +112,18 @@ func NewBlockServiceHandler(svc BlockServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(blockServiceMethods.ByName("GetLatestBlockHeader")),
 		connect.WithHandlerOptions(opts...),
 	)
+	blockServiceGetBlockHeadersHandler := connect.NewUnaryHandler(
+		BlockServiceGetBlockHeadersProcedure,
+		svc.GetBlockHeaders,
+		connect.WithSchema(blockServiceMethods.ByName("GetBlockHeaders")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/api.v1.BlockService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case BlockServiceGetLatestBlockHeaderProcedure:
 			blockServiceGetLatestBlockHeaderHandler.ServeHTTP(w, r)
+		case BlockServiceGetBlockHeadersProcedure:
+			blockServiceGetBlockHeadersHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -108,4 +135,8 @@ type UnimplementedBlockServiceHandler struct{}
 
 func (UnimplementedBlockServiceHandler) GetLatestBlockHeader(context.Context, *connect.Request[v1.GetLatestBlockHeaderRequest]) (*connect.Response[v1.GetLatestBlockHeaderResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.BlockService.GetLatestBlockHeader is not implemented"))
+}
+
+func (UnimplementedBlockServiceHandler) GetBlockHeaders(context.Context, *connect.Request[v1.GetBlockHeadersRequest]) (*connect.Response[v1.GetBlockHeadersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.BlockService.GetBlockHeaders is not implemented"))
 }

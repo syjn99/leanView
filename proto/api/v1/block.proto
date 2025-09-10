@@ -8,6 +8,9 @@ option go_package = "github.com/syjn99/leanView/backend/gen/proto/api/v1;apiv1";
 service BlockService {
   // Get the latest block header from the head cache
   rpc GetLatestBlockHeader(GetLatestBlockHeaderRequest) returns (GetLatestBlockHeaderResponse);
+  
+  // Get multiple block headers with pagination
+  rpc GetBlockHeaders(GetBlockHeadersRequest) returns (GetBlockHeadersResponse);
 }
 
 // --- Core Messages ---
@@ -31,4 +34,32 @@ message GetLatestBlockHeaderRequest {
 message GetLatestBlockHeaderResponse {
   BlockHeader block_header = 1;
   string block_root = 2;
+}
+
+// --- Paginated Block Headers ---
+
+// Request for paginated block headers
+message GetBlockHeadersRequest {
+  uint32 limit = 1;     // Max headers to return (default: 50, max: 100)
+  uint64 offset = 2;    // Slot number offset for pagination
+  
+  enum SortOrder {
+    SLOT_DESC = 0;      // Latest first (default)
+    SLOT_ASC = 1;       // Oldest first
+  }
+  SortOrder sort_order = 3;
+}
+
+// Response with paginated block headers
+message GetBlockHeadersResponse {
+  repeated BlockHeaderWithRoot headers = 1;
+  uint32 total_count = 2;        // Total headers in database
+  bool has_more = 3;              // More data available
+  uint64 next_offset = 4;         // Next offset for pagination
+}
+
+// Block header with computed root
+message BlockHeaderWithRoot {
+  BlockHeader header = 1;
+  string block_root = 2;          // Hex encoded with 0x prefix
 }

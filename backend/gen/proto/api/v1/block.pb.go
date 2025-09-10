@@ -21,6 +21,52 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type GetBlockHeadersRequest_SortOrder int32
+
+const (
+	GetBlockHeadersRequest_SLOT_DESC GetBlockHeadersRequest_SortOrder = 0 // Latest first (default)
+	GetBlockHeadersRequest_SLOT_ASC  GetBlockHeadersRequest_SortOrder = 1 // Oldest first
+)
+
+// Enum value maps for GetBlockHeadersRequest_SortOrder.
+var (
+	GetBlockHeadersRequest_SortOrder_name = map[int32]string{
+		0: "SLOT_DESC",
+		1: "SLOT_ASC",
+	}
+	GetBlockHeadersRequest_SortOrder_value = map[string]int32{
+		"SLOT_DESC": 0,
+		"SLOT_ASC":  1,
+	}
+)
+
+func (x GetBlockHeadersRequest_SortOrder) Enum() *GetBlockHeadersRequest_SortOrder {
+	p := new(GetBlockHeadersRequest_SortOrder)
+	*p = x
+	return p
+}
+
+func (x GetBlockHeadersRequest_SortOrder) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GetBlockHeadersRequest_SortOrder) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_api_v1_block_proto_enumTypes[0].Descriptor()
+}
+
+func (GetBlockHeadersRequest_SortOrder) Type() protoreflect.EnumType {
+	return &file_proto_api_v1_block_proto_enumTypes[0]
+}
+
+func (x GetBlockHeadersRequest_SortOrder) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GetBlockHeadersRequest_SortOrder.Descriptor instead.
+func (GetBlockHeadersRequest_SortOrder) EnumDescriptor() ([]byte, []int) {
+	return file_proto_api_v1_block_proto_rawDescGZIP(), []int{3, 0}
+}
+
 // BlockHeader represents essential block information
 type BlockHeader struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -187,6 +233,189 @@ func (x *GetLatestBlockHeaderResponse) GetBlockRoot() string {
 	return ""
 }
 
+// Request for paginated block headers
+type GetBlockHeadersRequest struct {
+	state         protoimpl.MessageState           `protogen:"open.v1"`
+	Limit         uint32                           `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`   // Max headers to return (default: 50, max: 100)
+	Offset        uint64                           `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"` // Slot number offset for pagination
+	SortOrder     GetBlockHeadersRequest_SortOrder `protobuf:"varint,3,opt,name=sort_order,json=sortOrder,proto3,enum=api.v1.GetBlockHeadersRequest_SortOrder" json:"sort_order,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBlockHeadersRequest) Reset() {
+	*x = GetBlockHeadersRequest{}
+	mi := &file_proto_api_v1_block_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBlockHeadersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBlockHeadersRequest) ProtoMessage() {}
+
+func (x *GetBlockHeadersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_block_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBlockHeadersRequest.ProtoReflect.Descriptor instead.
+func (*GetBlockHeadersRequest) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_block_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetBlockHeadersRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetBlockHeadersRequest) GetOffset() uint64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *GetBlockHeadersRequest) GetSortOrder() GetBlockHeadersRequest_SortOrder {
+	if x != nil {
+		return x.SortOrder
+	}
+	return GetBlockHeadersRequest_SLOT_DESC
+}
+
+// Response with paginated block headers
+type GetBlockHeadersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Headers       []*BlockHeaderWithRoot `protobuf:"bytes,1,rep,name=headers,proto3" json:"headers,omitempty"`
+	TotalCount    uint32                 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // Total headers in database
+	HasMore       bool                   `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`          // More data available
+	NextOffset    uint64                 `protobuf:"varint,4,opt,name=next_offset,json=nextOffset,proto3" json:"next_offset,omitempty"` // Next offset for pagination
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBlockHeadersResponse) Reset() {
+	*x = GetBlockHeadersResponse{}
+	mi := &file_proto_api_v1_block_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBlockHeadersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBlockHeadersResponse) ProtoMessage() {}
+
+func (x *GetBlockHeadersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_block_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBlockHeadersResponse.ProtoReflect.Descriptor instead.
+func (*GetBlockHeadersResponse) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_block_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetBlockHeadersResponse) GetHeaders() []*BlockHeaderWithRoot {
+	if x != nil {
+		return x.Headers
+	}
+	return nil
+}
+
+func (x *GetBlockHeadersResponse) GetTotalCount() uint32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *GetBlockHeadersResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
+func (x *GetBlockHeadersResponse) GetNextOffset() uint64 {
+	if x != nil {
+		return x.NextOffset
+	}
+	return 0
+}
+
+// Block header with computed root
+type BlockHeaderWithRoot struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Header        *BlockHeader           `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`
+	BlockRoot     string                 `protobuf:"bytes,2,opt,name=block_root,json=blockRoot,proto3" json:"block_root,omitempty"` // Hex encoded with 0x prefix
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BlockHeaderWithRoot) Reset() {
+	*x = BlockHeaderWithRoot{}
+	mi := &file_proto_api_v1_block_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BlockHeaderWithRoot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BlockHeaderWithRoot) ProtoMessage() {}
+
+func (x *BlockHeaderWithRoot) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_api_v1_block_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BlockHeaderWithRoot.ProtoReflect.Descriptor instead.
+func (*BlockHeaderWithRoot) Descriptor() ([]byte, []int) {
+	return file_proto_api_v1_block_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *BlockHeaderWithRoot) GetHeader() *BlockHeader {
+	if x != nil {
+		return x.Header
+	}
+	return nil
+}
+
+func (x *BlockHeaderWithRoot) GetBlockRoot() string {
+	if x != nil {
+		return x.BlockRoot
+	}
+	return ""
+}
+
 var File_proto_api_v1_block_proto protoreflect.FileDescriptor
 
 const file_proto_api_v1_block_proto_rawDesc = "" +
@@ -204,9 +433,29 @@ const file_proto_api_v1_block_proto_rawDesc = "" +
 	"\x1cGetLatestBlockHeaderResponse\x126\n" +
 	"\fblock_header\x18\x01 \x01(\v2\x13.api.v1.BlockHeaderR\vblockHeader\x12\x1d\n" +
 	"\n" +
-	"block_root\x18\x02 \x01(\tR\tblockRoot2q\n" +
+	"block_root\x18\x02 \x01(\tR\tblockRoot\"\xb9\x01\n" +
+	"\x16GetBlockHeadersRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\rR\x05limit\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x04R\x06offset\x12G\n" +
+	"\n" +
+	"sort_order\x18\x03 \x01(\x0e2(.api.v1.GetBlockHeadersRequest.SortOrderR\tsortOrder\"(\n" +
+	"\tSortOrder\x12\r\n" +
+	"\tSLOT_DESC\x10\x00\x12\f\n" +
+	"\bSLOT_ASC\x10\x01\"\xad\x01\n" +
+	"\x17GetBlockHeadersResponse\x125\n" +
+	"\aheaders\x18\x01 \x03(\v2\x1b.api.v1.BlockHeaderWithRootR\aheaders\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\rR\n" +
+	"totalCount\x12\x19\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12\x1f\n" +
+	"\vnext_offset\x18\x04 \x01(\x04R\n" +
+	"nextOffset\"a\n" +
+	"\x13BlockHeaderWithRoot\x12+\n" +
+	"\x06header\x18\x01 \x01(\v2\x13.api.v1.BlockHeaderR\x06header\x12\x1d\n" +
+	"\n" +
+	"block_root\x18\x02 \x01(\tR\tblockRoot2\xc5\x01\n" +
 	"\fBlockService\x12a\n" +
-	"\x14GetLatestBlockHeader\x12#.api.v1.GetLatestBlockHeaderRequest\x1a$.api.v1.GetLatestBlockHeaderResponseB;Z9github.com/syjn99/leanView/backend/gen/proto/api/v1;apiv1b\x06proto3"
+	"\x14GetLatestBlockHeader\x12#.api.v1.GetLatestBlockHeaderRequest\x1a$.api.v1.GetLatestBlockHeaderResponse\x12R\n" +
+	"\x0fGetBlockHeaders\x12\x1e.api.v1.GetBlockHeadersRequest\x1a\x1f.api.v1.GetBlockHeadersResponseB;Z9github.com/syjn99/leanView/backend/gen/proto/api/v1;apiv1b\x06proto3"
 
 var (
 	file_proto_api_v1_block_proto_rawDescOnce sync.Once
@@ -220,21 +469,31 @@ func file_proto_api_v1_block_proto_rawDescGZIP() []byte {
 	return file_proto_api_v1_block_proto_rawDescData
 }
 
-var file_proto_api_v1_block_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_proto_api_v1_block_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_proto_api_v1_block_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_api_v1_block_proto_goTypes = []any{
-	(*BlockHeader)(nil),                  // 0: api.v1.BlockHeader
-	(*GetLatestBlockHeaderRequest)(nil),  // 1: api.v1.GetLatestBlockHeaderRequest
-	(*GetLatestBlockHeaderResponse)(nil), // 2: api.v1.GetLatestBlockHeaderResponse
+	(GetBlockHeadersRequest_SortOrder)(0), // 0: api.v1.GetBlockHeadersRequest.SortOrder
+	(*BlockHeader)(nil),                   // 1: api.v1.BlockHeader
+	(*GetLatestBlockHeaderRequest)(nil),   // 2: api.v1.GetLatestBlockHeaderRequest
+	(*GetLatestBlockHeaderResponse)(nil),  // 3: api.v1.GetLatestBlockHeaderResponse
+	(*GetBlockHeadersRequest)(nil),        // 4: api.v1.GetBlockHeadersRequest
+	(*GetBlockHeadersResponse)(nil),       // 5: api.v1.GetBlockHeadersResponse
+	(*BlockHeaderWithRoot)(nil),           // 6: api.v1.BlockHeaderWithRoot
 }
 var file_proto_api_v1_block_proto_depIdxs = []int32{
-	0, // 0: api.v1.GetLatestBlockHeaderResponse.block_header:type_name -> api.v1.BlockHeader
-	1, // 1: api.v1.BlockService.GetLatestBlockHeader:input_type -> api.v1.GetLatestBlockHeaderRequest
-	2, // 2: api.v1.BlockService.GetLatestBlockHeader:output_type -> api.v1.GetLatestBlockHeaderResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 0: api.v1.GetLatestBlockHeaderResponse.block_header:type_name -> api.v1.BlockHeader
+	0, // 1: api.v1.GetBlockHeadersRequest.sort_order:type_name -> api.v1.GetBlockHeadersRequest.SortOrder
+	6, // 2: api.v1.GetBlockHeadersResponse.headers:type_name -> api.v1.BlockHeaderWithRoot
+	1, // 3: api.v1.BlockHeaderWithRoot.header:type_name -> api.v1.BlockHeader
+	2, // 4: api.v1.BlockService.GetLatestBlockHeader:input_type -> api.v1.GetLatestBlockHeaderRequest
+	4, // 5: api.v1.BlockService.GetBlockHeaders:input_type -> api.v1.GetBlockHeadersRequest
+	3, // 6: api.v1.BlockService.GetLatestBlockHeader:output_type -> api.v1.GetLatestBlockHeaderResponse
+	5, // 7: api.v1.BlockService.GetBlockHeaders:output_type -> api.v1.GetBlockHeadersResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_api_v1_block_proto_init() }
@@ -247,13 +506,14 @@ func file_proto_api_v1_block_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_api_v1_block_proto_rawDesc), len(file_proto_api_v1_block_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   3,
+			NumEnums:      1,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_api_v1_block_proto_goTypes,
 		DependencyIndexes: file_proto_api_v1_block_proto_depIdxs,
+		EnumInfos:         file_proto_api_v1_block_proto_enumTypes,
 		MessageInfos:      file_proto_api_v1_block_proto_msgTypes,
 	}.Build()
 	File_proto_api_v1_block_proto = out.File
