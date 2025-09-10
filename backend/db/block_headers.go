@@ -182,19 +182,17 @@ func GetBlockHeadersPaginated(limit int, offset uint64, ascending bool) ([]*type
 		query = `
 			SELECT slot, proposer_index, parent_root, state_root, body_root
 			FROM block_headers
-			WHERE slot >= ?
 			ORDER BY slot ASC
-			LIMIT ?`
+			LIMIT ? OFFSET ?`
 	} else {
 		query = `
 			SELECT slot, proposer_index, parent_root, state_root, body_root
 			FROM block_headers
-			WHERE slot <= ?
 			ORDER BY slot DESC
-			LIMIT ?`
+			LIMIT ? OFFSET ?`
 	}
 	
-	err := ReaderDb.Select(&headers, query, offset, limit)
+	err := ReaderDb.Select(&headers, query, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching paginated block headers: %w", err)
 	}

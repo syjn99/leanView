@@ -140,17 +140,8 @@ func (s *BlockService) GetBlockHeaders(
 	// Determine if there are more results
 	hasMore := len(headers) == int(limit)
 	
-	// Calculate next offset
-	var nextOffset uint64
-	if len(headers) > 0 {
-		if ascending {
-			nextOffset = headers[len(headers)-1].Slot + 1
-		} else {
-			nextOffset = headers[len(headers)-1].Slot - 1
-		}
-	} else {
-		nextOffset = offset
-	}
+	// Calculate next offset (row-based pagination)
+	nextOffset := offset + uint64(limit)
 	
 	s.logger.WithFields(logrus.Fields{
 		"limit":      limit,
